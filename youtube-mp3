@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Copyright (C) 2022 David De Grave <david@ledav.net>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+# Depends on: zenity, youtube-dl, notify-send (libnotify), tee & sed
+
+export d=${1:-$(zenity --entry --width=1000)} || exit 1
+
+[ -z "$d" ] && exit 1
+
+cd $HOME/tmp/ || exit 1
+(
+	title=$(youtube-dl --get-title "$d")
+	notify-send -u low -a youtube-mp3 "Processing ..." "$title"
+
+	mp3=$(\
+	 youtube-dl --extract-audio --audio-format=mp3 --audio-quality=192K "$d" \
+	 | tee /dev/stderr \
+	 | sed -ne '/.* Destination:/ s/.* Destination: \(.*\.mp3\).*/\1/ p'\
+	)
+
+	if [ $? -eq 0 ]; then
+		notify-send -u low      -a youtube-mp3 -t 30000 "Done" "$mp3"
+	else	notify-send -u critical -a youtube-mp3 -t 30000 "Failed !" "$mp3"; fi
+) &

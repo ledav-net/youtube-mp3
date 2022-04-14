@@ -1,0 +1,13 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Name[en_US]=Youtube to MP3
+Exec=~/bin/youtube-mp3
+Name=Youtube to MP3
+Icon=/usr/share/icons/mate/48x48/emblems/emblem-downloads.png
+Icon[en_US]=/usr/share/icons/mate/48x48/emblems/emblem-downloads.png
+Comment[en_US]=Convert a youtube url into ~/tmp/file.mp3
+Comment=Convert a youtube url into ~/tmp/
