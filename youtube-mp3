@@ -16,13 +16,22 @@
 
 # Depends on: zenity, youtube-dl, notify-send (libnotify), tee & sed
 
+cd "$HOME/tmp" || exit 1
+
 export d=${1:-$(zenity --entry --width=1000)} || exit 1
 
 [ -z "$d" ] && exit 1
-
-cd $HOME/tmp/ || exit 1
 (
-	title=$(youtube-dl --get-title "$d")
+	title=$(youtube-dl --verbose --get-title "$d")
+	if [ $? -ne 0 ]; then
+		# In case you get this ERROR message, just start it on the command
+		# line and look at the outputs to try to understand and maybe fix
+		# the problem by yourself
+
+		notify-send -u critical -a youtube-mp3 "ERROR !" "Cannot download '$d'"
+		exit 1
+	fi
+
 	notify-send -u low -a youtube-mp3 "Processing ..." "$title"
 
 	mp3=$(\
@@ -35,3 +44,4 @@ cd $HOME/tmp/ || exit 1
 		notify-send -u low      -a youtube-mp3 -t 30000 "Done" "$mp3"
 	else	notify-send -u critical -a youtube-mp3 -t 30000 "Failed !" "$mp3"; fi
 ) &
+tty -s && wait
