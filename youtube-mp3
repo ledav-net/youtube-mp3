@@ -22,7 +22,18 @@ d=${1:-$(zenity --entry --width=1000)} || exit 1
 
 [ -z "$d" ] && exit 1
 
-title=$(youtube-dl --verbose --get-title "$d")
+if [[ "$d" =~ [\?\&]list=.* ]]; then
+	if zenity --question --ok-label="Drop" --cancel-label="Keep going" --text="Playlist detected !"
+	then
+		d=$(sed 's/[&?]list=.*&\?//' <<< "$d")
+		[[ "$d" =~ .*\? ]] || d=$(sed 's/\&/\?/' <<< "$d")
+	fi
+fi
+
+notify-send -u low -a youtube-mp3 "Processing" "$d"
+
+title=$($BIN "${BIN_ARGS[@]}" --verbose --get-title "$d")
+
 if [ $? -ne 0 ]; then
 	# In case you get this ERROR message, just start it on the command
 	# line and look at the outputs to try to understand and maybe fix
@@ -32,7 +43,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-notify-send -u low -a youtube-mp3 "Processing ..." "$title"
+notify-send -u low -a youtube-mp3 "Downloading" "$title"
 
 mp3=$(\
  youtube-dl --extract-audio --audio-format=mp3 --audio-quality=192K "$d" \
