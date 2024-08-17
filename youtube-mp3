@@ -30,8 +30,10 @@ if [[ "$d" =~ [\?\&]list=.* ]]; then
 	fi
 fi
 
-notify-send -u low -a youtube-mp3 "Processing" "$d"
+BIN=${YOUTUBE_DL:-$(command -v youtube-dl)} || exit 1
+BIN_ARGS=(-x --user-agent 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.103 Mobile Safari/537.36')
 
+notify-send -u low -a youtube-mp3 "Processing" "$d"
 title=$($BIN "${BIN_ARGS[@]}" --verbose --get-title "$d")
 
 if [ $? -ne 0 ]; then
@@ -46,7 +48,7 @@ fi
 notify-send -u low -a youtube-mp3 "Downloading" "$title"
 
 mp3=$(\
- youtube-dl --extract-audio --audio-format=mp3 --audio-quality=192K "$d" \
+ $BIN "${BIN_ARGS[@]}" --extract-audio --audio-format=mp3 --audio-quality=192K "$d" \
  | tee /dev/stderr \
  | sed -ne '/.* Destination:/ s/.* Destination: \(.*\.mp3\).*/\1/ p'\
 )
