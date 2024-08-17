@@ -53,6 +53,6 @@ mp3=$(\
  | sed -ne '/.* Destination:/ s/.* Destination: \(.*\.mp3\).*/\1/ p'\
 )
 
-if [ $? -eq 0 ]; then
+if [ ${PIPESTATUS[0]} -eq 0 ]; then
 	notify-send -u low      -a youtube-mp3 -t 30000 "Done" "$mp3"
 else	notify-send -u critical -a youtube-mp3 -t 30000 "Failed !" "$mp3"; fi
