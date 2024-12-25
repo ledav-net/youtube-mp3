@@ -30,7 +30,15 @@ if [[ "$url" =~ [\?\&]list=.* ]]; then
 	fi
 fi
 
-BIN=${YOUTUBE_DL:-$(command -v youtube-dl)} || exit 1
+if [ -n "$YOUTUBE_DL" ]; then
+	BIN=$YOUTUBE_DL
+else
+	BIN=$(command -v youtube-dl) \
+	|| BIN=$(command -v yt-dlp)
+fi
+
+[ -x "$BIN" ] || exit 1
+
 BIN_ARGS=(-x --user-agent 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.103 Mobile Safari/537.36')
 
 notify-send -u low -a youtube-mp3 "Processing" "$url"
