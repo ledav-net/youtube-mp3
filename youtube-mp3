@@ -18,37 +18,37 @@
 
 cd "$HOME/tmp" || exit 1
 
-d=${1:-$(zenity --entry --width=1000)} || exit 1
+url=${1:-$(zenity --entry --text='Enter the youtube URL' --width=1000)} || exit 1
 
-[ -z "$d" ] && exit 1
+[ -z "$url" ] && exit 1
 
-if [[ "$d" =~ [\?\&]list=.* ]]; then
+if [[ "$url" =~ [\?\&]list=.* ]]; then
 	if zenity --question --ok-label="Drop" --cancel-label="Keep going" --text="Playlist detected !"
 	then
-		d=$(sed 's/[&?]list=.*&\?//' <<< "$d")
-		[[ "$d" =~ .*\? ]] || d=$(sed 's/\&/\?/' <<< "$d")
+		url=$(sed 's/[&?]list=.*&\?//' <<< "$url")
+		[[ "$url" =~ .*\? ]] || url=$(sed 's/\&/\?/' <<< "$url")
 	fi
 fi
 
 BIN=${YOUTUBE_DL:-$(command -v youtube-dl)} || exit 1
 BIN_ARGS=(-x --user-agent 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.103 Mobile Safari/537.36')
 
-notify-send -u low -a youtube-mp3 "Processing" "$d"
-title=$($BIN "${BIN_ARGS[@]}" --verbose --get-title "$d")
+notify-send -u low -a youtube-mp3 "Processing" "$url"
+title=$($BIN "${BIN_ARGS[@]}" --verbose --get-title -- "$url")
 
 if [ $? -ne 0 ]; then
 	# In case you get this ERROR message, just start it on the command
 	# line and look at the outputs to try to understand and maybe fix
 	# the problem by yourself
 
-	notify-send -u critical -a youtube-mp3 "ERROR !" "Cannot download '$d'"
+	notify-send -u critical -a youtube-mp3 "ERROR !" "Cannot download '$url'"
 	exit 1
 fi
 
 notify-send -u low -a youtube-mp3 "Downloading" "$title"
 
 mp3=$(\
- $BIN "${BIN_ARGS[@]}" --extract-audio --audio-format=mp3 --audio-quality=192K "$d" \
+ $BIN "${BIN_ARGS[@]}" --extract-audio --audio-format=mp3 --audio-quality=192K -- "$url" \
  | tee /dev/stderr \
  | sed -ne '/.* Destination:/ s/.* Destination: \(.*\.mp3\).*/\1/ p'\
 )
