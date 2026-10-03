@@ -55,12 +55,12 @@ fi
 
 notify-send -u low -a youtube-mp3 "Downloading" "$title"
 
-mp3=$(\
+mp3=$(set -o pipefail; \
  $BIN "${BIN_ARGS[@]}" --extract-audio --audio-format=mp3 --audio-quality=192K -- "$url" \
  | tee /dev/stderr \
  | sed -ne '/.* Destination:/ s/.* Destination: \(.*\.mp3\).*/\1/ p'\
 )
 
-if [ ${PIPESTATUS[0]} -eq 0 ]; then
+if [ $? -eq 0 ]; then
 	notify-send -u low      -a youtube-mp3 -t 30000 "Done" "$mp3"
 else	notify-send -u critical -a youtube-mp3 -t 30000 "Failed !" "$mp3"; fi
